@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>马大灯笼节 - 幸运抽奖</title>
+    <title>马大灯笼节 - 终极抽奖</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Cinzel:wght@900&display=swap');
 
@@ -14,19 +14,27 @@
             font-family: 'Cinzel', serif; 
             color: white;
             user-select: none;
-            cursor: crosshair; /* Cool cursor */
+            cursor: crosshair; 
         }
 
         #lantern-canvas {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
+            top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
         }
 
-        /* --- SPEED LINES (WARP EFFECT) --- */
+        /* --- 1. SCREEN SHAKE ANIMATION (THE RUMBLE) --- */
+        .rumble-active {
+            animation: rumble 0.1s infinite;
+        }
+        @keyframes rumble {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-2px, 2px); }
+            50% { transform: translate(2px, -2px); }
+            75% { transform: translate(-2px, -2px); }
+            100% { transform: translate(2px, 2px); }
+        }
+
+        /* --- SPEED LINES --- */
         #speed-lines {
             position: absolute;
             top: 50%; left: 50%;
@@ -87,7 +95,7 @@
             text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
         }
 
-        /* --- CONTROLS --- */
+        /* --- 2. MAGICAL BUTTON (PULSATING) --- */
         #controls {
             position: absolute;
             bottom: 15%; 
@@ -99,17 +107,28 @@
         button {
             background: linear-gradient(to bottom, #d92027, #8c0a0a);
             border: 3px solid #ffcc00;
-            padding: 15px 80px;
-            font-size: 35px;
+            padding: 20px 100px; /* Wider button */
+            font-size: 40px;
             font-family: 'Ma Shan Zheng', cursive;
             color: #ffcc00;
             cursor: pointer;
-            border-radius: 50px;
+            border-radius: 60px;
             box-shadow: 0 0 30px rgba(255, 77, 77, 0.6);
             transition: all 0.2s ease;
             text-shadow: 2px 2px 0px #500000;
+            animation: heartbeat 1.5s infinite; /* Alive effect */
+        }
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 60px #ffcc00;
         }
         button:active { transform: scale(0.95); }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(255, 204, 0, 0.8); }
+            100% { transform: scale(1); }
+        }
 
         /* --- WINNER SCREEN --- */
         #winner-screen {
@@ -145,6 +164,27 @@
         }
         @keyframes rotateRays { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
+        /* --- 3. SHOCKWAVE EFFECT --- */
+        .shockwave {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0px; height: 0px;
+            border-radius: 50%;
+            border: 10px solid #ffcc00;
+            opacity: 0;
+            z-index: 1;
+            box-shadow: 0 0 50px #ffcc00, inset 0 0 50px #ffcc00;
+            pointer-events: none;
+        }
+        .shockwave-active {
+            animation: shockwaveAnim 0.8s ease-out forwards;
+        }
+        @keyframes shockwaveAnim {
+            0% { width: 0px; height: 0px; opacity: 1; border-width: 20px; }
+            100% { width: 200vw; height: 200vw; opacity: 0; border-width: 0px; }
+        }
+
         .winner-label {
             font-family: 'Ma Shan Zheng', cursive;
             font-size: 100px; 
@@ -161,7 +201,6 @@
             position: relative;
             z-index: 2;
         }
-        /* New Animation for the number locking in */
         .number-pop {
             animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -177,7 +216,6 @@
         }
 
         /* --- SCRAMBLER TEXT --- */
-        /* This hides the result text initially and shows the scrambler */
         #scramble-container {
             position: absolute;
             top: 60%;
@@ -201,7 +239,7 @@
 
     <div id="flash"></div>
     <div id="speed-lines"></div> 
-    <canvas id="lantern-canvas"></canvas>
+    <div class="shockwave" id="shockwave"></div> <canvas id="lantern-canvas"></canvas>
 
     <div id="scramble-container">000</div>
 
@@ -212,7 +250,7 @@
     </div>
 
     <div id="controls">
-        <button id="ignite-btn" onclick="startDraw()">⚡ 启动 ⚡</button>
+        <button id="ignite-btn" onclick="startDraw()">⚡ 启 动 ⚡</button>
     </div>
 
     <div id="winner-screen">
@@ -267,19 +305,18 @@
         update() {
             let targetSpeed = this.baseSpeed;
             
-            // Mouse Repel Logic (Idle Mode)
             if (currentState === 'IDLE') {
                 const dx = this.x - mouseX;
                 const dy = this.y - mouseY;
                 const distance = Math.sqrt(dx*dx + dy*dy);
                 if (distance < 150) {
-                    this.x += dx * 0.05; // Gently push away
+                    this.x += dx * 0.05; 
                     this.y += dy * 0.05;
                 }
             }
 
             if (currentState === 'STORM') {
-                targetSpeed = this.baseSpeed * 35; // Warp Speed
+                targetSpeed = this.baseSpeed * 35; 
                 if (this.speed < targetSpeed) this.speed += 1.5;
             } else {
                 if (this.speed > this.baseSpeed) this.speed *= 0.9;
@@ -294,12 +331,10 @@
             ctx.save();
             ctx.translate(this.x, this.y);
             
-            // NEW: Light Trail Effect during STORM
             if (currentState === 'STORM') {
                 ctx.beginPath();
                 ctx.fillStyle = this.color;
                 ctx.globalAlpha = 0.5;
-                // Draw a long tail behind
                 ctx.fillRect(-this.baseSize/2, 0, this.baseSize, this.speed * 3);
                 ctx.globalAlpha = 1.0;
             }
@@ -307,21 +342,19 @@
             ctx.shadowBlur = 15;
             ctx.shadowColor = this.color;
 
-            // Trapezoid Shape
+            // Trapezoid
             const w = this.baseSize;
             const h = this.baseSize * 1.4;
-
             ctx.beginPath();
             ctx.moveTo(-w/2, -h/2); 
             ctx.lineTo(w/2, -h/2);  
             ctx.lineTo(w/3, h/2);   
             ctx.lineTo(-w/3, h/2);  
             ctx.closePath();
-            
             ctx.fillStyle = this.color;
             ctx.fill();
 
-            // Flame Core
+            // Core
             ctx.shadowBlur = 25;
             ctx.shadowColor = "#ffcc00"; 
             ctx.beginPath();
@@ -341,7 +374,7 @@
     }
     animate();
 
-    // --- FIREWORKS SYSTEM ---
+    // --- FIREWORKS ---
     const fwCanvas = document.getElementById('firework-canvas');
     const fwCtx = fwCanvas.getContext('2d');
     let fireworks = [];
@@ -382,7 +415,9 @@
     const sfxStorm = document.getElementById('sfx-storm');
     const sfxBoom = document.getElementById('sfx-boom');
     const scrambleEl = document.getElementById('scramble-container');
+    const shockwaveEl = document.getElementById('shockwave');
     let scrambleInterval;
+    let startTime;
 
     function startDraw() {
         // UI Updates
@@ -394,13 +429,29 @@
         try { sfxStorm.currentTime = 0; sfxStorm.play(); } catch(e){}
 
         currentState = 'STORM';
+        
+        // ADD SCREEN SHAKE (RUMBLE)
+        document.body.classList.add('rumble-active');
+        
         document.getElementById('speed-lines').classList.add('warp-active'); 
 
-        // Start Scrambling Numbers
+        // Start Scrambling with Color Shift
         scrambleEl.style.display = 'block';
+        startTime = Date.now();
+        
         scrambleInterval = setInterval(() => {
             scrambleEl.innerText = Math.floor(Math.random() * TOTAL_PARTICIPANTS) + 1;
-        }, 50); // Updates every 50ms
+            
+            // Heat up color (Red -> White)
+            let elapsed = Date.now() - startTime;
+            let progress = elapsed / DRAW_DURATION;
+            // Transition from Red (0) to Gold (1)
+            let g = Math.floor(204 * progress);
+            let b = Math.floor(0 * progress);
+            scrambleEl.style.color = `rgb(255, ${g}, ${b})`;
+            scrambleEl.style.textShadow = `0 0 ${20 + progress*50}px red`;
+            
+        }, 50); 
 
         setTimeout(() => { revealWinner(); }, DRAW_DURATION); 
     }
@@ -408,8 +459,11 @@
     function revealWinner() {
         const winningNumber = Math.floor(Math.random() * TOTAL_PARTICIPANTS) + 1;
 
-        clearInterval(scrambleInterval); // Stop scrambling
-        scrambleEl.style.display = 'none'; // Hide scrambler
+        clearInterval(scrambleInterval); 
+        scrambleEl.style.display = 'none'; 
+
+        // STOP SHAKE
+        document.body.classList.remove('rumble-active');
 
         try { sfxStorm.pause(); sfxBoom.currentTime = 0; sfxBoom.play(); } catch(e){}
 
@@ -419,15 +473,19 @@
         currentState = 'IDLE'; 
         document.getElementById('speed-lines').classList.remove('warp-active');
 
+        // TRIGGER SHOCKWAVE
+        shockwaveEl.classList.remove('shockwave-active');
+        void shockwaveEl.offsetWidth; // trigger reflow
+        shockwaveEl.classList.add('shockwave-active');
+
         const winnerScreen = document.getElementById('winner-screen');
         const resultText = document.getElementById('result-text');
         
         resultText.innerText = winningNumber;
         winnerScreen.classList.add('visible');
         
-        // Add Pop Animation
         resultText.classList.remove('number-pop');
-        void resultText.offsetWidth; // Trigger reflow
+        void resultText.offsetWidth; 
         resultText.classList.add('number-pop');
 
         createExplosion(window.innerWidth/2, window.innerHeight/2);
