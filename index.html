@@ -51,18 +51,6 @@
             to { transform: translate(-50%, -50%) rotate(180deg) scale(1.5); }
         }
 
-        /* --- STORM OVERLAY (The Grey Transparent Background) --- */
-        /* This appears during the scramble phase */
-        #storm-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7); /* Grey Transparent */
-            backdrop-filter: blur(5px);
-            z-index: 12; /* Behind scramble text, above lanterns */
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.5s;
-        }
-        .storm-active { opacity: 1 !important; }
-
         /* --- MAIN TITLE --- */
         #main-title {
             position: absolute;
@@ -138,7 +126,7 @@
             z-index: 20;
             opacity: 0;
             pointer-events: none;
-            background: rgba(0,0,0,0.85); /* Dark background for readability */
+            background: rgba(0,0,0,0.85); /* Darker for final result */
             backdrop-filter: blur(5px);
             transition: opacity 0.2s;
         }
@@ -187,22 +175,37 @@
             transition: opacity 0.1s; mix-blend-mode: overlay;
         }
 
-        /* --- FIXED: SCRAMBLER TEXT POSITION --- */
-        #scramble-container {
-            position: absolute;
-            top: 50%; 
-            left: 50%;
-            transform: translate(-50%, -50%);
-            /* Reduced font size to ensure it fits */
-            font-size: 130px; 
-            font-weight: 900;
-            color: rgba(255, 255, 255, 0.3);
-            z-index: 15;
+        /* --- FIXED: SCRAMBLE SCREEN (UNIFIED) --- */
+        /* This replaces the old absolute positioning method */
+        #scramble-screen {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            
+            /* FLEXBOX CENTERING (Same as Winner Screen) */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background: rgba(0, 0, 0, 0.7); /* Grey Transparent Background */
+            backdrop-filter: blur(5px);
+            z-index: 15; /* Above lanterns/title, below winner */
+            
+            opacity: 0;
             pointer-events: none;
-            display: none;
+            transition: opacity 0.5s;
+        }
+        .scramble-active { opacity: 1 !important; }
+
+        /* The text inside the scramble screen */
+        #scramble-text {
+            font-size: 160px; 
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.5); /* Semi-transparent white start */
             font-family: 'Cinzel', serif;
             line-height: 1; 
-            white-space: nowrap; /* Prevents wrapping */
         }
         
         .shockwave {
@@ -228,11 +231,11 @@
     <div id="speed-lines"></div> 
     <div class="shockwave" id="shockwave"></div> 
     
-    <div id="storm-overlay"></div>
-
     <canvas id="lantern-canvas"></canvas>
 
-    <div id="scramble-container">000</div>
+    <div id="scramble-screen">
+        <div id="scramble-text">000</div>
+    </div>
 
     <div id="main-title">
         <h1 class="title-chinese">马大灯笼节</h1>
@@ -350,9 +353,12 @@
     // --- LOGIC ---
     const sfxStorm = document.getElementById('sfx-storm');
     const sfxBoom = document.getElementById('sfx-boom');
-    const scrambleEl = document.getElementById('scramble-container');
+    
+    // Updated Selectors for New Scramble Screen
+    const scrambleScreen = document.getElementById('scramble-screen');
+    const scrambleText = document.getElementById('scramble-text');
     const shockwaveEl = document.getElementById('shockwave');
-    const stormOverlay = document.getElementById('storm-overlay');
+    
     let scrambleInterval; let startTime;
 
     function startDraw() {
@@ -367,18 +373,19 @@
         document.body.classList.add('rumble-active');
         document.getElementById('speed-lines').classList.add('warp-active'); 
         
-        // Show Grey Overlay
-        stormOverlay.classList.add('storm-active');
+        // ACTIVATE SCRAMBLE SCREEN (Grey BG + Centered Text)
+        scrambleScreen.classList.add('scramble-active');
 
-        scrambleEl.style.display = 'block';
         startTime = Date.now();
         scrambleInterval = setInterval(() => {
-            scrambleEl.innerText = Math.floor(Math.random() * TOTAL_PARTICIPANTS) + 1;
+            scrambleText.innerText = Math.floor(Math.random() * TOTAL_PARTICIPANTS) + 1;
+            
+            // Color Logic (Red -> Gold)
             let elapsed = Date.now() - startTime;
             let progress = elapsed / DRAW_DURATION;
             let g = Math.floor(204 * progress); let b = Math.floor(0 * progress);
-            scrambleEl.style.color = `rgb(255, ${g}, ${b})`;
-            scrambleEl.style.textShadow = `0 0 ${20 + progress*50}px red`;
+            scrambleText.style.color = `rgb(255, ${g}, ${b})`;
+            scrambleText.style.textShadow = `0 0 ${20 + progress*50}px red`;
         }, 50); 
 
         setTimeout(() => { revealWinner(); }, DRAW_DURATION); 
@@ -386,7 +393,11 @@
 
     function revealWinner() {
         const winningNumber = Math.floor(Math.random() * TOTAL_PARTICIPANTS) + 1;
-        clearInterval(scrambleInterval); scrambleEl.style.display = 'none'; 
+        clearInterval(scrambleInterval); 
+        
+        // HIDE SCRAMBLE SCREEN
+        scrambleScreen.classList.remove('scramble-active');
+        
         document.body.classList.remove('rumble-active');
         try { sfxStorm.pause(); sfxBoom.currentTime = 0; sfxBoom.play(); } catch(e){}
 
@@ -396,9 +407,6 @@
         currentState = 'IDLE'; 
         document.getElementById('speed-lines').classList.remove('warp-active');
         
-        // Hide Grey Overlay (Winner screen takes over)
-        stormOverlay.classList.remove('storm-active');
-
         shockwaveEl.classList.remove('shockwave-active');
         void shockwaveEl.offsetWidth; shockwaveEl.classList.add('shockwave-active');
 
