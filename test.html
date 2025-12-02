@@ -28,7 +28,7 @@
         }
 
         /* =========================================
-           UPDATED: THE MAIN TITLE BOX
+           THE MAIN TITLE BOX (Glass Effect)
            ========================================= */
         #main-title {
             position: absolute;
@@ -40,13 +40,13 @@
             transition: opacity 0.5s ease-out;
             pointer-events: none;
 
-            /* NEW: Grey Semi-Transparent Box Styling */
-            background: rgba(40, 40, 40, 0.6); /* Dark Grey Transparent */
-            backdrop-filter: blur(8px);        /* Blurs the lanterns behind it */
-            padding: 40px 80px;                /* Space around text */
-            border-radius: 50px;               /* Rounded corners */
-            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);    /* Drop shadow */
+            /* Grey Semi-Transparent Box Styling */
+            background: rgba(40, 40, 40, 0.6); 
+            backdrop-filter: blur(8px);        
+            padding: 40px 80px;                
+            border-radius: 50px;               
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);    
         }
 
         .title-chinese {
@@ -56,7 +56,6 @@
             margin: 0;
             text-shadow: 0 0 30px rgba(255, 70, 70, 0.8), 2px 2px 0px #8c0a0a;
             letter-spacing: 10px;
-            /* Animation applied to text inside the box */
             animation: breathe 3s infinite ease-in-out;
         }
 
@@ -80,7 +79,7 @@
         /* The Control Button Area */
         #controls {
             position: absolute;
-            bottom: 12%; /* Adjusted position */
+            bottom: 12%; 
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
@@ -166,25 +165,12 @@
             mix-blend-mode: hard-light;
         }
 
-        #sound-status {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: rgba(255,255,255,0.3);
-            font-size: 12px;
-            z-index: 5;
-        }
-
     </style>
 </head>
 <body>
 
-    <audio id="sfx-storm" src="storm.mp3" preload="auto"></audio>
-    <audio id="sfx-boom" src="boom.mp3" preload="auto"></audio>
-
     <div id="flash"></div>
     <canvas id="lantern-canvas"></canvas>
-    <div id="sound-status">需要音频: storm.mp3 & boom.mp3</div>
 
     <div id="main-title">
         <h1 class="title-chinese">马大灯笼节</h1>
@@ -318,25 +304,19 @@
     animate();
 
     // ==========================================
-    // LOGIC
+    // LOGIC (NO AUDIO)
     // ==========================================
-    const sfxStorm = document.getElementById('sfx-storm');
-    const sfxBoom = document.getElementById('sfx-boom');
 
     function startDraw() {
+        // Hide Controls and Title
         document.getElementById('ignite-btn').style.opacity = '0'; 
         document.getElementById('ignite-btn').style.pointerEvents = 'none';
-        
-        // HIDE THE TITLE
         document.getElementById('main-title').style.opacity = '0';
 
-        try {
-            sfxStorm.currentTime = 0;
-            sfxStorm.play();
-        } catch(e) {}
-
+        // Start Visual Storm
         currentState = 'STORM';
         
+        // Wait 4 seconds for tension
         setTimeout(() => {
             revealWinner();
         }, 4000); 
@@ -345,18 +325,15 @@
     function revealWinner() {
         const winningNumber = Math.floor(Math.random() * TOTAL_PARTICIPANTS) + 1;
 
-        try {
-            sfxStorm.pause(); 
-            sfxBoom.currentTime = 0; 
-            sfxBoom.play();   
-        } catch(e) {}
-
+        // Flash Effect
         const flash = document.getElementById('flash');
         flash.style.opacity = '1';
         setTimeout(() => { flash.style.opacity = '0'; }, 800);
 
+        // Stop Storm
         currentState = 'IDLE'; 
 
+        // Show Winner
         const winnerScreen = document.getElementById('winner-screen');
         const resultText = document.getElementById('result-text');
         
@@ -371,7 +348,6 @@
         igniteBtn.style.opacity = '1';
         igniteBtn.style.pointerEvents = 'auto';
 
-        // SHOW THE TITLE AGAIN
         document.getElementById('main-title').style.opacity = '1';
 
         currentState = 'IDLE';
