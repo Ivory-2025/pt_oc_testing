@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>马大灯笼节 - 终极抽奖</title>
+    <title>马大灯笼节 - 幸运抽奖</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Cinzel:wght@900&display=swap');
 
@@ -14,6 +14,7 @@
             font-family: 'Cinzel', serif; 
             color: white;
             user-select: none;
+            cursor: crosshair; /* Cool cursor */
         }
 
         #lantern-canvas {
@@ -28,10 +29,8 @@
         /* --- SPEED LINES (WARP EFFECT) --- */
         #speed-lines {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 200vw;
-            height: 200vw;
+            top: 50%; left: 50%;
+            width: 200vw; height: 200vw;
             transform: translate(-50%, -50%);
             background: repeating-conic-gradient(
                 from 0deg,
@@ -58,8 +57,7 @@
         /* --- MAIN TITLE --- */
         #main-title {
             position: absolute;
-            top: 40%; 
-            left: 50%;
+            top: 40%; left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
             z-index: 5;
@@ -130,7 +128,7 @@
         }
         #winner-screen.visible { opacity: 1; pointer-events: auto; }
 
-        /* --- GOD RAYS (HOLY LIGHT) --- */
+        /* --- GOD RAYS --- */
         .god-rays {
             position: absolute;
             width: 150vh; height: 150vh;
@@ -149,7 +147,7 @@
 
         .winner-label {
             font-family: 'Ma Shan Zheng', cursive;
-            font-size: 100px; /* MUCH BIGGER */
+            font-size: 100px; 
             color: #ffcc00;
             margin-bottom: 30px;
             text-shadow: 0 0 40px #ff0000;
@@ -160,20 +158,38 @@
             font-weight: 900;
             color: #fff;
             text-shadow: 0 0 10px #ffcc00, 0 0 30px #ffcc00, 0 0 80px #ff0000;
-            animation: slamDown 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             z-index: 2;
         }
-        @keyframes slamDown {
-            0% { transform: scale(5); opacity: 0; }
-            50% { transform: scale(0.9); opacity: 1; }
-            100% { transform: scale(1); }
+        /* New Animation for the number locking in */
+        .number-pop {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { transform: scale(3); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         #flash {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: white; z-index: 100; pointer-events: none; opacity: 0;
             transition: opacity 0.1s; mix-blend-mode: overlay;
+        }
+
+        /* --- SCRAMBLER TEXT --- */
+        /* This hides the result text initially and shows the scrambler */
+        #scramble-container {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 150px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.3);
+            z-index: 15;
+            pointer-events: none;
+            display: none;
+            font-family: 'Cinzel', serif;
         }
 
     </style>
@@ -187,6 +203,8 @@
     <div id="speed-lines"></div> 
     <canvas id="lantern-canvas"></canvas>
 
+    <div id="scramble-container">000</div>
+
     <div id="main-title">
         <h1 class="title-chinese">马大灯笼节</h1>
         <div class="title-english">PESTA TANGLUNG UM</div>
@@ -199,13 +217,9 @@
 
     <div id="winner-screen">
         <div class="god-rays"></div> 
-        
         <div class="winner-label">✨ 天选之人 ✨</div>
-        
         <div class="winner-number" id="result-text">---</div>
-        
         <button style="margin-top: 80px; font-size: 35px; padding: 20px 80px;" onclick="resetDraw()">下一位 (Next)</button>
-        
         <canvas id="firework-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
     </div>
 
@@ -213,12 +227,20 @@
     const TOTAL_PARTICIPANTS = 1500; 
     const DRAW_DURATION = 4500; 
 
+    // --- MOUSE INTERACTION ---
+    let mouseX = 0;
+    let mouseY = 0;
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
     // --- LANTERN SYSTEM ---
     const canvas = document.getElementById('lantern-canvas');
     const ctx = canvas.getContext('2d');
     let width, height;
     let particles = [];
-    const VISUAL_COUNT = 120; // Fewer particles since they are complex shapes
+    const VISUAL_COUNT = 120;
     let currentState = 'IDLE'; 
 
     function resize() {
@@ -234,24 +256,31 @@
         reset() {
             this.x = Math.random() * width;
             this.y = height + Math.random() * 200;
-            
-            // TRAPEZOID SIZE
             this.baseSize = Math.random() * 25 + 20; 
-            
             this.baseSpeed = Math.random() * 1.5 + 0.5;
             this.speed = this.baseSpeed;
-            
             const hue = Math.floor(Math.random() * 40); 
             this.color = `hsla(${hue}, 90%, 50%, 0.9)`;
-            
             this.wobble = Math.random() * Math.PI * 2;
         }
 
         update() {
             let targetSpeed = this.baseSpeed;
+            
+            // Mouse Repel Logic (Idle Mode)
+            if (currentState === 'IDLE') {
+                const dx = this.x - mouseX;
+                const dy = this.y - mouseY;
+                const distance = Math.sqrt(dx*dx + dy*dy);
+                if (distance < 150) {
+                    this.x += dx * 0.05; // Gently push away
+                    this.y += dy * 0.05;
+                }
+            }
+
             if (currentState === 'STORM') {
-                targetSpeed = this.baseSpeed * 30; // SUPER FAST
-                if (this.speed < targetSpeed) this.speed += 1.0;
+                targetSpeed = this.baseSpeed * 35; // Warp Speed
+                if (this.speed < targetSpeed) this.speed += 1.5;
             } else {
                 if (this.speed > this.baseSpeed) this.speed *= 0.9;
             }
@@ -261,11 +290,20 @@
             if (this.y < -100) this.reset();
         }
 
-        // RESTORED TRAPEZOID DRAW METHOD
         draw() {
             ctx.save();
             ctx.translate(this.x, this.y);
             
+            // NEW: Light Trail Effect during STORM
+            if (currentState === 'STORM') {
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = 0.5;
+                // Draw a long tail behind
+                ctx.fillRect(-this.baseSize/2, 0, this.baseSize, this.speed * 3);
+                ctx.globalAlpha = 1.0;
+            }
+
             ctx.shadowBlur = 15;
             ctx.shadowColor = this.color;
 
@@ -295,6 +333,7 @@
         }
     }
     for (let i=0; i<VISUAL_COUNT; i++) particles.push(new Lantern());
+    
     function animate() {
         ctx.clearRect(0, 0, width, height); 
         particles.forEach(p => { p.update(); p.draw(); });
@@ -342,8 +381,11 @@
     // --- LOGIC ---
     const sfxStorm = document.getElementById('sfx-storm');
     const sfxBoom = document.getElementById('sfx-boom');
+    const scrambleEl = document.getElementById('scramble-container');
+    let scrambleInterval;
 
     function startDraw() {
+        // UI Updates
         document.getElementById('ignite-btn').style.opacity = '0'; 
         document.getElementById('ignite-btn').style.pointerEvents = 'none';
         document.getElementById('main-title').style.opacity = '0';
@@ -354,11 +396,20 @@
         currentState = 'STORM';
         document.getElementById('speed-lines').classList.add('warp-active'); 
 
+        // Start Scrambling Numbers
+        scrambleEl.style.display = 'block';
+        scrambleInterval = setInterval(() => {
+            scrambleEl.innerText = Math.floor(Math.random() * TOTAL_PARTICIPANTS) + 1;
+        }, 50); // Updates every 50ms
+
         setTimeout(() => { revealWinner(); }, DRAW_DURATION); 
     }
 
     function revealWinner() {
         const winningNumber = Math.floor(Math.random() * TOTAL_PARTICIPANTS) + 1;
+
+        clearInterval(scrambleInterval); // Stop scrambling
+        scrambleEl.style.display = 'none'; // Hide scrambler
 
         try { sfxStorm.pause(); sfxBoom.currentTime = 0; sfxBoom.play(); } catch(e){}
 
@@ -373,6 +424,11 @@
         
         resultText.innerText = winningNumber;
         winnerScreen.classList.add('visible');
+        
+        // Add Pop Animation
+        resultText.classList.remove('number-pop');
+        void resultText.offsetWidth; // Trigger reflow
+        resultText.classList.add('number-pop');
 
         createExplosion(window.innerWidth/2, window.innerHeight/2);
         setTimeout(() => createExplosion(window.innerWidth/2 - 200, window.innerHeight/2 - 100), 200);
