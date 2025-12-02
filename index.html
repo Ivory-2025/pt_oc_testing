@@ -164,13 +164,28 @@
             transition: opacity 1s ease-out; 
             mix-blend-mode: hard-light;
         }
+        
+        #sound-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: rgba(255,255,255,0.3);
+            font-size: 12px;
+            z-index: 5;
+            pointer-events: none;
+        }
 
     </style>
 </head>
 <body>
 
+    <audio id="sfx-storm" src="storm.mp3" preload="auto"></audio>
+    <audio id="sfx-boom" src="boom.mp3" preload="auto"></audio>
+
     <div id="flash"></div>
     <canvas id="lantern-canvas"></canvas>
+    
+    <div id="sound-status">Audio System Ready</div>
 
     <div id="main-title">
         <h1 class="title-chinese">马大灯笼节</h1>
@@ -193,6 +208,7 @@
     // CONFIGURATION
     // ==========================================
     const TOTAL_PARTICIPANTS = 1500; 
+    const DRAW_DURATION = 4500; // 4.5 seconds (Matches average drum roll)
 
     // ==========================================
     // VISUAL SETUP
@@ -223,13 +239,11 @@
             this.x = Math.random() * width;
             this.y = height + Math.random() * 200;
             
-            // Large size
             this.baseSize = Math.random() * 25 + 20; 
             
             this.baseSpeed = Math.random() * 1.5 + 0.5;
             this.speed = this.baseSpeed;
             
-            // Warm colors
             const hue = Math.floor(Math.random() * 40); 
             this.color = `hsla(${hue}, 90%, 50%, 0.9)`;
             
@@ -304,8 +318,10 @@
     animate();
 
     // ==========================================
-    // LOGIC (NO AUDIO)
+    // AUDIO & LOGIC
     // ==========================================
+    const sfxStorm = document.getElementById('sfx-storm');
+    const sfxBoom = document.getElementById('sfx-boom');
 
     function startDraw() {
         // Hide Controls and Title
@@ -313,17 +329,32 @@
         document.getElementById('ignite-btn').style.pointerEvents = 'none';
         document.getElementById('main-title').style.opacity = '0';
 
+        // Play Drum Roll (Storm)
+        try {
+            sfxStorm.currentTime = 0;
+            sfxStorm.volume = 1.0;
+            sfxStorm.play().catch(e => console.log("Audio permission needed: click the page first"));
+        } catch(e) {}
+
         // Start Visual Storm
         currentState = 'STORM';
         
-        // Wait 4 seconds for tension
+        // Wait for the duration of the drum roll
         setTimeout(() => {
             revealWinner();
-        }, 4000); 
+        }, DRAW_DURATION); 
     }
 
     function revealWinner() {
         const winningNumber = Math.floor(Math.random() * TOTAL_PARTICIPANTS) + 1;
+
+        // Play Gong (Boom)
+        try {
+            sfxStorm.pause();     // Stop drums
+            sfxBoom.currentTime = 0; 
+            sfxBoom.volume = 1.0;
+            sfxBoom.play();       // Hit Gong
+        } catch(e) {}
 
         // Flash Effect
         const flash = document.getElementById('flash');
