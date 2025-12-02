@@ -25,7 +25,7 @@
             z-index: 1;
         }
 
-        /* --- NEW: SPEED LINES (WARP EFFECT) --- */
+        /* --- SPEED LINES (WARP EFFECT) --- */
         #speed-lines {
             position: absolute;
             top: 50%;
@@ -89,7 +89,7 @@
             text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
         }
 
-        /* --- BUTTON --- */
+        /* --- CONTROLS --- */
         #controls {
             position: absolute;
             bottom: 15%; 
@@ -130,7 +130,7 @@
         }
         #winner-screen.visible { opacity: 1; pointer-events: auto; }
 
-        /* --- NEW: GOD RAYS (HOLY LIGHT) --- */
+        /* --- GOD RAYS (HOLY LIGHT) --- */
         .god-rays {
             position: absolute;
             width: 150vh; height: 150vh;
@@ -140,8 +140,8 @@
                 transparent 20deg, 
                 transparent 40deg
             );
-            animation: rotateRays 10s linear infinite;
-            z-index: -1; /* Behind the number */
+            animation: rotateRays 20s linear infinite;
+            z-index: -1; 
             border-radius: 50%;
             mask-image: radial-gradient(black, transparent 70%);
         }
@@ -149,17 +149,17 @@
 
         .winner-label {
             font-family: 'Ma Shan Zheng', cursive;
-            font-size: 50px;
+            font-size: 100px; /* MUCH BIGGER */
             color: #ffcc00;
             margin-bottom: 30px;
-            text-shadow: 0 0 20px #ff0000;
+            text-shadow: 0 0 40px #ff0000;
+            letter-spacing: 10px;
         }
         .winner-number {
-            font-size: 200px;
+            font-size: 220px;
             font-weight: 900;
             color: #fff;
             text-shadow: 0 0 10px #ffcc00, 0 0 30px #ffcc00, 0 0 80px #ff0000;
-            /* The Slam Effect */
             animation: slamDown 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             z-index: 2;
@@ -184,7 +184,8 @@
     <audio id="sfx-boom" src="boom.mp3" preload="auto"></audio>
 
     <div id="flash"></div>
-    <div id="speed-lines"></div> <canvas id="lantern-canvas"></canvas>
+    <div id="speed-lines"></div> 
+    <canvas id="lantern-canvas"></canvas>
 
     <div id="main-title">
         <h1 class="title-chinese">马大灯笼节</h1>
@@ -197,9 +198,14 @@
     </div>
 
     <div id="winner-screen">
-        <div class="god-rays"></div> <div class="winner-label">✨ 天选之人 (THE CHOSEN ONE) ✨</div>
+        <div class="god-rays"></div> 
+        
+        <div class="winner-label">✨ 天选之人 ✨</div>
+        
         <div class="winner-number" id="result-text">---</div>
-        <button style="margin-top: 60px; font-size: 20px; padding: 10px 40px;" onclick="resetDraw()">Next Draw</button>
+        
+        <button style="margin-top: 80px; font-size: 35px; padding: 20px 80px;" onclick="resetDraw()">下一位 (Next)</button>
+        
         <canvas id="firework-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
     </div>
 
@@ -212,7 +218,7 @@
     const ctx = canvas.getContext('2d');
     let width, height;
     let particles = [];
-    const VISUAL_COUNT = 150; 
+    const VISUAL_COUNT = 120; // Fewer particles since they are complex shapes
     let currentState = 'IDLE'; 
 
     function resize() {
@@ -224,16 +230,23 @@
 
     class Lantern {
         constructor() { this.reset(); this.y = Math.random() * height; }
+        
         reset() {
             this.x = Math.random() * width;
             this.y = height + Math.random() * 200;
-            this.baseSize = Math.random() * 20 + 15; 
+            
+            // TRAPEZOID SIZE
+            this.baseSize = Math.random() * 25 + 20; 
+            
             this.baseSpeed = Math.random() * 1.5 + 0.5;
             this.speed = this.baseSpeed;
+            
             const hue = Math.floor(Math.random() * 40); 
             this.color = `hsla(${hue}, 90%, 50%, 0.9)`;
+            
             this.wobble = Math.random() * Math.PI * 2;
         }
+
         update() {
             let targetSpeed = this.baseSpeed;
             if (currentState === 'STORM') {
@@ -247,12 +260,38 @@
             this.wobble += 0.05;
             if (this.y < -100) this.reset();
         }
+
+        // RESTORED TRAPEZOID DRAW METHOD
         draw() {
-            ctx.fillStyle = this.color;
-            ctx.shadowBlur = 15; ctx.shadowColor = this.color;
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = this.color;
+
+            // Trapezoid Shape
+            const w = this.baseSize;
+            const h = this.baseSize * 1.4;
+
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.baseSize, 0, Math.PI*2); // Simplified glow
+            ctx.moveTo(-w/2, -h/2); 
+            ctx.lineTo(w/2, -h/2);  
+            ctx.lineTo(w/3, h/2);   
+            ctx.lineTo(-w/3, h/2);  
+            ctx.closePath();
+            
+            ctx.fillStyle = this.color;
             ctx.fill();
+
+            // Flame Core
+            ctx.shadowBlur = 25;
+            ctx.shadowColor = "#ffcc00"; 
+            ctx.beginPath();
+            ctx.arc(0, h/4, w/4, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffcc"; 
+            ctx.fill();
+
+            ctx.restore();
         }
     }
     for (let i=0; i<VISUAL_COUNT; i++) particles.push(new Lantern());
@@ -263,7 +302,7 @@
     }
     animate();
 
-    // --- FIREWORKS SYSTEM (The Bombastic Part) ---
+    // --- FIREWORKS SYSTEM ---
     const fwCanvas = document.getElementById('firework-canvas');
     const fwCtx = fwCanvas.getContext('2d');
     let fireworks = [];
@@ -289,7 +328,7 @@
         fwCtx.clearRect(0, 0, fwCanvas.width, fwCanvas.height);
         fireworks.forEach((p, index) => {
             p.x += p.vx; p.y += p.vy;
-            p.vy += 0.2; // Gravity
+            p.vy += 0.2; 
             p.life -= 0.02;
             fwCtx.globalAlpha = p.life;
             fwCtx.fillStyle = p.color;
@@ -308,12 +347,12 @@
         document.getElementById('ignite-btn').style.opacity = '0'; 
         document.getElementById('ignite-btn').style.pointerEvents = 'none';
         document.getElementById('main-title').style.opacity = '0';
-        document.getElementById('main-title').style.transform = 'translate(-50%, -50%) scale(0.5)'; // Shrink title
+        document.getElementById('main-title').style.transform = 'translate(-50%, -50%) scale(0.5)'; 
 
         try { sfxStorm.currentTime = 0; sfxStorm.play(); } catch(e){}
 
         currentState = 'STORM';
-        document.getElementById('speed-lines').classList.add('warp-active'); // ENABLE WARP LINES
+        document.getElementById('speed-lines').classList.add('warp-active'); 
 
         setTimeout(() => { revealWinner(); }, DRAW_DURATION); 
     }
@@ -335,7 +374,6 @@
         resultText.innerText = winningNumber;
         winnerScreen.classList.add('visible');
 
-        // TRIGGER FIREWORKS
         createExplosion(window.innerWidth/2, window.innerHeight/2);
         setTimeout(() => createExplosion(window.innerWidth/2 - 200, window.innerHeight/2 - 100), 200);
         setTimeout(() => createExplosion(window.innerWidth/2 + 200, window.innerHeight/2 + 100), 400);
