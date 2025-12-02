@@ -22,10 +22,8 @@
             top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
         }
 
-        /* --- 1. SCREEN SHAKE ANIMATION (THE RUMBLE) --- */
-        .rumble-active {
-            animation: rumble 0.1s infinite;
-        }
+        /* --- SCREEN SHAKE --- */
+        .rumble-active { animation: rumble 0.1s infinite; }
         @keyframes rumble {
             0% { transform: translate(0, 0); }
             25% { transform: translate(-2px, 2px); }
@@ -41,22 +39,15 @@
             width: 200vw; height: 200vw;
             transform: translate(-50%, -50%);
             background: repeating-conic-gradient(
-                from 0deg,
-                rgba(255, 255, 255, 0) 0deg,
+                from 0deg, rgba(255, 255, 255, 0) 0deg,
                 rgba(255, 255, 255, 0) 10deg,
                 rgba(255, 255, 255, 0.1) 10.5deg,
                 rgba(255, 255, 255, 0) 11deg
             );
-            z-index: 2;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s;
-            border-radius: 50%;
+            z-index: 2; opacity: 0; pointer-events: none;
+            transition: opacity 0.5s; border-radius: 50%;
         }
-        .warp-active {
-            animation: spinLines 2s linear infinite;
-            opacity: 1 !important;
-        }
+        .warp-active { animation: spinLines 2s linear infinite; opacity: 1 !important; }
         @keyframes spinLines {
             from { transform: translate(-50%, -50%) rotate(0deg) scale(1.5); }
             to { transform: translate(-50%, -50%) rotate(180deg) scale(1.5); }
@@ -65,7 +56,8 @@
         /* --- MAIN TITLE --- */
         #main-title {
             position: absolute;
-            top: 40%; left: 50%;
+            top: 45%; /* Moved slightly lower */
+            left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
             z-index: 5;
@@ -73,14 +65,14 @@
             pointer-events: none;
             background: rgba(40, 40, 40, 0.6); 
             backdrop-filter: blur(10px);        
-            padding: 40px 80px;                
+            padding: 30px 60px;                
             border-radius: 50px;               
             border: 1px solid rgba(255, 204, 0, 0.2); 
             box-shadow: 0 10px 50px rgba(0,0,0,0.8);    
         }
         .title-chinese {
             font-family: 'Ma Shan Zheng', cursive;
-            font-size: 90px; 
+            font-size: 80px; /* Slightly smaller to fit better */
             color: #ffcc00;   
             margin: 0;
             text-shadow: 0 0 40px rgba(255, 100, 0, 0.8);
@@ -88,17 +80,17 @@
         }
         .title-english {
             font-family: 'Cinzel', serif;
-            font-size: 28px;
+            font-size: 24px;
             color: #ff9e9e; 
             letter-spacing: 8px;
-            margin-top: 15px;
+            margin-top: 10px;
             text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
         }
 
-        /* --- 2. MAGICAL BUTTON (PULSATING) --- */
+        /* --- BUTTON --- */
         #controls {
             position: absolute;
-            bottom: 15%; 
+            bottom: 12%; 
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
@@ -107,8 +99,8 @@
         button {
             background: linear-gradient(to bottom, #d92027, #8c0a0a);
             border: 3px solid #ffcc00;
-            padding: 20px 100px; /* Wider button */
-            font-size: 40px;
+            padding: 15px 80px;
+            font-size: 35px;
             font-family: 'Ma Shan Zheng', cursive;
             color: #ffcc00;
             cursor: pointer;
@@ -116,14 +108,10 @@
             box-shadow: 0 0 30px rgba(255, 77, 77, 0.6);
             transition: all 0.2s ease;
             text-shadow: 2px 2px 0px #500000;
-            animation: heartbeat 1.5s infinite; /* Alive effect */
+            animation: heartbeat 1.5s infinite;
         }
-        button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 60px #ffcc00;
-        }
+        button:hover { transform: scale(1.1); box-shadow: 0 0 60px #ffcc00; }
         button:active { transform: scale(0.95); }
-        
         @keyframes heartbeat {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(255, 204, 0, 0.8); }
@@ -147,15 +135,12 @@
         }
         #winner-screen.visible { opacity: 1; pointer-events: auto; }
 
-        /* --- GOD RAYS --- */
         .god-rays {
             position: absolute;
             width: 150vh; height: 150vh;
             background: repeating-conic-gradient(
-                rgba(255, 204, 0, 0.1) 0deg, 
-                rgba(255, 204, 0, 0.1) 20deg, 
-                transparent 20deg, 
-                transparent 40deg
+                rgba(255, 204, 0, 0.1) 0deg, rgba(255, 204, 0, 0.1) 20deg, 
+                transparent 20deg, transparent 40deg
             );
             animation: rotateRays 20s linear infinite;
             z-index: -1; 
@@ -164,46 +149,27 @@
         }
         @keyframes rotateRays { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- 3. SHOCKWAVE EFFECT --- */
-        .shockwave {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 0px; height: 0px;
-            border-radius: 50%;
-            border: 10px solid #ffcc00;
-            opacity: 0;
-            z-index: 1;
-            box-shadow: 0 0 50px #ffcc00, inset 0 0 50px #ffcc00;
-            pointer-events: none;
-        }
-        .shockwave-active {
-            animation: shockwaveAnim 0.8s ease-out forwards;
-        }
-        @keyframes shockwaveAnim {
-            0% { width: 0px; height: 0px; opacity: 1; border-width: 20px; }
-            100% { width: 200vw; height: 200vw; opacity: 0; border-width: 0px; }
-        }
-
+        /* --- WINNER TEXT ADJUSTMENTS --- */
         .winner-label {
             font-family: 'Ma Shan Zheng', cursive;
-            font-size: 100px; 
+            font-size: 80px; /* Reduced from 100px */
             color: #ffcc00;
-            margin-bottom: 30px;
+            margin-bottom: 10px; /* Less gap */
             text-shadow: 0 0 40px #ff0000;
             letter-spacing: 10px;
+            margin-top: 50px; /* Push down slightly */
         }
         .winner-number {
-            font-size: 220px;
+            font-size: 180px; /* Reduced from 220px to fit screen */
             font-weight: 900;
             color: #fff;
             text-shadow: 0 0 10px #ffcc00, 0 0 30px #ffcc00, 0 0 80px #ff0000;
             position: relative;
             z-index: 2;
+            line-height: 1.1; /* Fix for cutting off top */
+            padding-bottom: 10px;
         }
-        .number-pop {
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .number-pop { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popIn {
             0% { transform: scale(3); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
@@ -215,19 +181,32 @@
             transition: opacity 0.1s; mix-blend-mode: overlay;
         }
 
-        /* --- SCRAMBLER TEXT --- */
+        /* --- SCRAMBLER TEXT ADJUSTMENTS --- */
         #scramble-container {
             position: absolute;
-            top: 60%;
+            top: 50%; /* MOVED TO DEAD CENTER */
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 150px;
+            font-size: 160px; /* Slightly adjusted */
             font-weight: 900;
             color: rgba(255, 255, 255, 0.3);
             z-index: 15;
             pointer-events: none;
             display: none;
             font-family: 'Cinzel', serif;
+            line-height: 1; /* Prevents vertical clipping */
+        }
+        
+        .shockwave {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 0px; height: 0px; border-radius: 50%;
+            border: 10px solid #ffcc00; opacity: 0; z-index: 1;
+            box-shadow: 0 0 50px #ffcc00, inset 0 0 50px #ffcc00; pointer-events: none;
+        }
+        .shockwave-active { animation: shockwaveAnim 0.8s ease-out forwards; }
+        @keyframes shockwaveAnim {
+            0% { width: 0px; height: 0px; opacity: 1; border-width: 20px; }
+            100% { width: 200vw; height: 200vw; opacity: 0; border-width: 0px; }
         }
 
     </style>
@@ -239,7 +218,8 @@
 
     <div id="flash"></div>
     <div id="speed-lines"></div> 
-    <div class="shockwave" id="shockwave"></div> <canvas id="lantern-canvas"></canvas>
+    <div class="shockwave" id="shockwave"></div> 
+    <canvas id="lantern-canvas"></canvas>
 
     <div id="scramble-container">000</div>
 
@@ -257,7 +237,7 @@
         <div class="god-rays"></div> 
         <div class="winner-label">✨ 天选之人 ✨</div>
         <div class="winner-number" id="result-text">---</div>
-        <button style="margin-top: 80px; font-size: 35px; padding: 20px 80px;" onclick="resetDraw()">下一位 (Next)</button>
+        <button style="margin-top: 60px; font-size: 30px; padding: 15px 60px;" onclick="resetDraw()">下一位 (Next)</button>
         <canvas id="firework-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
     </div>
 
@@ -266,12 +246,8 @@
     const DRAW_DURATION = 4500; 
 
     // --- MOUSE INTERACTION ---
-    let mouseX = 0;
-    let mouseY = 0;
-    document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-    });
+    let mouseX = 0; let mouseY = 0;
+    document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
 
     // --- LANTERN SYSTEM ---
     const canvas = document.getElementById('lantern-canvas');
@@ -281,92 +257,50 @@
     const VISUAL_COUNT = 120;
     let currentState = 'IDLE'; 
 
-    function resize() {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-    }
+    function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
     window.addEventListener('resize', resize);
     resize();
 
     class Lantern {
         constructor() { this.reset(); this.y = Math.random() * height; }
-        
         reset() {
-            this.x = Math.random() * width;
-            this.y = height + Math.random() * 200;
+            this.x = Math.random() * width; this.y = height + Math.random() * 200;
             this.baseSize = Math.random() * 25 + 20; 
-            this.baseSpeed = Math.random() * 1.5 + 0.5;
-            this.speed = this.baseSpeed;
+            this.baseSpeed = Math.random() * 1.5 + 0.5; this.speed = this.baseSpeed;
             const hue = Math.floor(Math.random() * 40); 
             this.color = `hsla(${hue}, 90%, 50%, 0.9)`;
             this.wobble = Math.random() * Math.PI * 2;
         }
-
         update() {
             let targetSpeed = this.baseSpeed;
-            
             if (currentState === 'IDLE') {
-                const dx = this.x - mouseX;
-                const dy = this.y - mouseY;
-                const distance = Math.sqrt(dx*dx + dy*dy);
-                if (distance < 150) {
-                    this.x += dx * 0.05; 
-                    this.y += dy * 0.05;
-                }
+                const dx = this.x - mouseX; const dy = this.y - mouseY;
+                if (Math.sqrt(dx*dx + dy*dy) < 150) { this.x += dx * 0.05; this.y += dy * 0.05; }
             }
-
             if (currentState === 'STORM') {
                 targetSpeed = this.baseSpeed * 35; 
                 if (this.speed < targetSpeed) this.speed += 1.5;
-            } else {
-                if (this.speed > this.baseSpeed) this.speed *= 0.9;
-            }
-            this.y -= this.speed;
-            this.x += Math.sin(this.wobble) * 0.5; 
-            this.wobble += 0.05;
+            } else { if (this.speed > this.baseSpeed) this.speed *= 0.9; }
+            this.y -= this.speed; this.x += Math.sin(this.wobble) * 0.5; this.wobble += 0.05;
             if (this.y < -100) this.reset();
         }
-
         draw() {
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            
+            ctx.save(); ctx.translate(this.x, this.y);
             if (currentState === 'STORM') {
-                ctx.beginPath();
-                ctx.fillStyle = this.color;
-                ctx.globalAlpha = 0.5;
-                ctx.fillRect(-this.baseSize/2, 0, this.baseSize, this.speed * 3);
-                ctx.globalAlpha = 1.0;
+                ctx.beginPath(); ctx.fillStyle = this.color; ctx.globalAlpha = 0.5;
+                ctx.fillRect(-this.baseSize/2, 0, this.baseSize, this.speed * 3); ctx.globalAlpha = 1.0;
             }
-
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = this.color;
-
-            // Trapezoid
-            const w = this.baseSize;
-            const h = this.baseSize * 1.4;
-            ctx.beginPath();
-            ctx.moveTo(-w/2, -h/2); 
-            ctx.lineTo(w/2, -h/2);  
-            ctx.lineTo(w/3, h/2);   
-            ctx.lineTo(-w/3, h/2);  
-            ctx.closePath();
-            ctx.fillStyle = this.color;
-            ctx.fill();
-
-            // Core
-            ctx.shadowBlur = 25;
-            ctx.shadowColor = "#ffcc00"; 
-            ctx.beginPath();
-            ctx.arc(0, h/4, w/4, 0, Math.PI * 2);
-            ctx.fillStyle = "#ffffcc"; 
-            ctx.fill();
-
+            ctx.shadowBlur = 15; ctx.shadowColor = this.color;
+            const w = this.baseSize; const h = this.baseSize * 1.4;
+            ctx.beginPath(); ctx.moveTo(-w/2, -h/2); ctx.lineTo(w/2, -h/2);  
+            ctx.lineTo(w/3, h/2); ctx.lineTo(-w/3, h/2); ctx.closePath();
+            ctx.fillStyle = this.color; ctx.fill();
+            ctx.shadowBlur = 25; ctx.shadowColor = "#ffcc00"; 
+            ctx.beginPath(); ctx.arc(0, h/4, w/4, 0, Math.PI * 2); ctx.fillStyle = "#ffffcc"; ctx.fill();
             ctx.restore();
         }
     }
     for (let i=0; i<VISUAL_COUNT; i++) particles.push(new Lantern());
-    
     function animate() {
         ctx.clearRect(0, 0, width, height); 
         particles.forEach(p => { p.update(); p.draw(); });
@@ -378,32 +312,23 @@
     const fwCanvas = document.getElementById('firework-canvas');
     const fwCtx = fwCanvas.getContext('2d');
     let fireworks = [];
-
     function resizeFW() { fwCanvas.width = window.innerWidth; fwCanvas.height = window.innerHeight; }
-    window.addEventListener('resize', resizeFW);
-    resizeFW();
+    window.addEventListener('resize', resizeFW); resizeFW();
 
     function createExplosion(x, y) {
         const colors = ['#ff0000', '#ffcc00', '#ffffff', '#ffaa00'];
         for (let i = 0; i < 30; i++) {
             fireworks.push({
-                x: x, y: y,
-                vx: (Math.random() - 0.5) * 15,
-                vy: (Math.random() - 0.5) * 15,
-                life: 1.0,
-                color: colors[Math.floor(Math.random() * colors.length)]
+                x: x, y: y, vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15,
+                life: 1.0, color: colors[Math.floor(Math.random() * colors.length)]
             });
         }
     }
-
     function animateFireworks() {
         fwCtx.clearRect(0, 0, fwCanvas.width, fwCanvas.height);
         fireworks.forEach((p, index) => {
-            p.x += p.vx; p.y += p.vy;
-            p.vy += 0.2; 
-            p.life -= 0.02;
-            fwCtx.globalAlpha = p.life;
-            fwCtx.fillStyle = p.color;
+            p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life -= 0.02;
+            fwCtx.globalAlpha = p.life; fwCtx.fillStyle = p.color;
             fwCtx.beginPath(); fwCtx.arc(p.x, p.y, 5, 0, Math.PI*2); fwCtx.fill();
             if(p.life <= 0) fireworks.splice(index, 1);
         });
@@ -416,11 +341,9 @@
     const sfxBoom = document.getElementById('sfx-boom');
     const scrambleEl = document.getElementById('scramble-container');
     const shockwaveEl = document.getElementById('shockwave');
-    let scrambleInterval;
-    let startTime;
+    let scrambleInterval; let startTime;
 
     function startDraw() {
-        // UI Updates
         document.getElementById('ignite-btn').style.opacity = '0'; 
         document.getElementById('ignite-btn').style.pointerEvents = 'none';
         document.getElementById('main-title').style.opacity = '0';
@@ -429,28 +352,18 @@
         try { sfxStorm.currentTime = 0; sfxStorm.play(); } catch(e){}
 
         currentState = 'STORM';
-        
-        // ADD SCREEN SHAKE (RUMBLE)
         document.body.classList.add('rumble-active');
-        
         document.getElementById('speed-lines').classList.add('warp-active'); 
 
-        // Start Scrambling with Color Shift
         scrambleEl.style.display = 'block';
         startTime = Date.now();
-        
         scrambleInterval = setInterval(() => {
             scrambleEl.innerText = Math.floor(Math.random() * TOTAL_PARTICIPANTS) + 1;
-            
-            // Heat up color (Red -> White)
             let elapsed = Date.now() - startTime;
             let progress = elapsed / DRAW_DURATION;
-            // Transition from Red (0) to Gold (1)
-            let g = Math.floor(204 * progress);
-            let b = Math.floor(0 * progress);
+            let g = Math.floor(204 * progress); let b = Math.floor(0 * progress);
             scrambleEl.style.color = `rgb(255, ${g}, ${b})`;
             scrambleEl.style.textShadow = `0 0 ${20 + progress*50}px red`;
-            
         }, 50); 
 
         setTimeout(() => { revealWinner(); }, DRAW_DURATION); 
@@ -458,13 +371,8 @@
 
     function revealWinner() {
         const winningNumber = Math.floor(Math.random() * TOTAL_PARTICIPANTS) + 1;
-
-        clearInterval(scrambleInterval); 
-        scrambleEl.style.display = 'none'; 
-
-        // STOP SHAKE
+        clearInterval(scrambleInterval); scrambleEl.style.display = 'none'; 
         document.body.classList.remove('rumble-active');
-
         try { sfxStorm.pause(); sfxBoom.currentTime = 0; sfxBoom.play(); } catch(e){}
 
         document.getElementById('flash').style.opacity = '1';
@@ -472,21 +380,16 @@
 
         currentState = 'IDLE'; 
         document.getElementById('speed-lines').classList.remove('warp-active');
-
-        // TRIGGER SHOCKWAVE
         shockwaveEl.classList.remove('shockwave-active');
-        void shockwaveEl.offsetWidth; // trigger reflow
-        shockwaveEl.classList.add('shockwave-active');
+        void shockwaveEl.offsetWidth; shockwaveEl.classList.add('shockwave-active');
 
         const winnerScreen = document.getElementById('winner-screen');
         const resultText = document.getElementById('result-text');
         
         resultText.innerText = winningNumber;
         winnerScreen.classList.add('visible');
-        
         resultText.classList.remove('number-pop');
-        void resultText.offsetWidth; 
-        resultText.classList.add('number-pop');
+        void resultText.offsetWidth; resultText.classList.add('number-pop');
 
         createExplosion(window.innerWidth/2, window.innerHeight/2);
         setTimeout(() => createExplosion(window.innerWidth/2 - 200, window.innerHeight/2 - 100), 200);
@@ -498,11 +401,9 @@
         const igniteBtn = document.getElementById('ignite-btn');
         igniteBtn.style.opacity = '1';
         igniteBtn.style.pointerEvents = 'auto';
-        
         const title = document.getElementById('main-title');
         title.style.opacity = '1';
         title.style.transform = 'translate(-50%, -50%) scale(1)';
-        
         currentState = 'IDLE';
     }
 </script>
