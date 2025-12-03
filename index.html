@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>马大灯笼节 - 幸运抽奖</title>
+    <title>马大灯笼节 - 幸运抽奖 (Final)</title>
     <style>
+        /* =========================================
+           1. FONTS & GLOBAL VARIABLES
+           ========================================= */
         @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Cinzel:wght@900&display=swap');
 
         :root {
@@ -12,35 +15,44 @@
             --primary-red: #ff3333;
         }
 
-        /* --- LAYOUT FIX: FIXED POSITIONING --- */
+        /* =========================================
+           2. LAYOUT STABILITY (SOLVES "RUN AWAY")
+           ========================================= */
         html, body {
-            width: 100%; height: 100%;
-            margin: 0; padding: 0;
-            overflow: hidden;
-            position: fixed; /* Locks the page in place */
+            width: 100%; 
+            height: 100%;
+            margin: 0; 
+            padding: 0;
+            overflow: hidden; /* Prevents scrollbars */
+            position: fixed;  /* CRITICAL: Locks page in place on mobile/laptops */
             top: 0; left: 0;
             background-color: #000;
             background: radial-gradient(circle at center, #4a0e0e 0%, #1a0505 50%, #000000 100%);
             font-family: 'Cinzel', serif; 
             color: white;
-            user-select: none;
+            user-select: none; /* Prevents text highlighting */
             -webkit-user-select: none;
             cursor: default; 
         }
 
+        /* Main Drawing Canvas */
         #game-canvas {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
         }
 
-        /* --- UPDATED GOD RAYS (BRIGHTER + FASTER) --- */
+        /* =========================================
+           3. BACKGROUND VISUAL EFFECTS
+           ========================================= */
+        
+        /* Rotating Light Beams (God Rays) */
         .god-rays {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 150vmax; height: 150vmax;
+            width: 150vmax; height: 150vmax; /* Ensures rays cover largest screen dimension */
             
-            /* BRIGHTER: Increased opacity (0.08 -> 0.15) and lightness */
+            /* Brighter, glowing yellow rays */
             background: repeating-conic-gradient(
                 rgba(255, 235, 150, 0.15) 0deg, 
                 rgba(255, 235, 150, 0.15) 15deg, 
@@ -48,11 +60,8 @@
                 transparent 30deg
             );
 
-            /* CENTER GLOW: Makes light feel like it comes from the middle */
+            /* Center Glow for "Eruption" effect */
             box-shadow: 0 0 100px 80px rgba(255, 200, 50, 0.2);
-
-            /* PERFORMANCE: Removed expensive mask-image. 
-               We rely on the .vignette overlay to fade the edges instead. */
             
             mix-blend-mode: screen; 
             animation: rotateRays 60s linear infinite;
@@ -62,15 +71,18 @@
         }
         @keyframes rotateRays { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-        /* --- VIGNETTE (Adds Depth & Hides Ray Edges) --- */
+        /* Vignette (Darkens corners for depth) */
         .vignette {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 2;
-            /* Stronger vignette to contrast with brighter center */
             background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.9) 100%);
         }
 
-        /* --- UI OVERLAYS --- */
+        /* =========================================
+           4. UI ELEMENTS (GLASSMORPHISM)
+           ========================================= */
+        
+        /* Unified Overlay for Scramble/Winner Screens */
         .overlay-screen {
             position: fixed; 
             top: 0; left: 0; width: 100%; height: 100%;
@@ -87,20 +99,21 @@
         }
         .visible { opacity: 1 !important; pointer-events: auto !important; }
 
-        /* --- TYPOGRAPHY --- */
+        /* Scramble Numbers */
         #scramble-text {
             font-family: 'Cinzel', serif;
             font-weight: 900;
             font-size: 15vw; 
             color: #fff;
             line-height: 1; 
-            font-variant-numeric: tabular-nums; 
-            text-shadow: 0 0 80px rgba(255, 200, 0, 1.0); /* Stronger glow */
+            font-variant-numeric: tabular-nums; /* Prevents jittering */
+            text-shadow: 0 0 80px rgba(255, 200, 0, 1.0); 
             will-change: transform;
             transform: scale(0.9);
             transition: transform 0.1s;
         }
 
+        /* Winner Screen Text */
         .winner-label {
             font-family: 'Ma Shan Zheng', cursive;
             font-size: 5vw; 
@@ -120,6 +133,7 @@
             line-height: 1;
         }
         
+        /* Animations */
         .number-pop { animation: superSlam 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         @keyframes superSlam {
             0% { transform: scale(3); opacity: 0; filter: blur(20px); }
@@ -130,7 +144,7 @@
             50% { transform: translateY(-10px); }
         }
 
-        /* --- MAIN TITLE (AESTHETIC GREY GLASS) --- */
+        /* Main Title Box */
         #main-title {
             position: absolute;
             top: 45%; left: 50%;
@@ -140,27 +154,21 @@
             transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             pointer-events: none;
             padding: 5vh 8vw;                
-            width: max-content; /* Ensures box fits content exactly */
+            width: max-content; 
             
-            /* Premium Grey Gradient */
-            background: linear-gradient(
-                145deg, 
-                rgba(50, 50, 50, 0.7), 
-                rgba(20, 20, 20, 0.9)
-            );
-            
+            /* Glassmorphism Background */
+            background: linear-gradient(145deg, rgba(50, 50, 50, 0.7), rgba(20, 20, 20, 0.9));
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            
             border-radius: 24px;                
+            
+            /* Lighting Borders */
             border-top: 1px solid rgba(255, 255, 255, 0.15);
             border-left: 1px solid rgba(255, 255, 255, 0.15);
             border-bottom: 1px solid rgba(0, 0, 0, 0.4);
             border-right: 1px solid rgba(0, 0, 0, 0.4);
 
-            box-shadow: 
-                0 20px 50px 0 rgba(0, 0, 0, 0.6), 
-                inset 0 0 30px rgba(255, 255, 255, 0.02);
+            box-shadow: 0 20px 50px 0 rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.02);
         }
 
         .title-chinese {
@@ -170,7 +178,7 @@
             margin: 0;
             text-shadow: 0 2px 10px rgba(0,0,0,0.5), 0 0 30px rgba(255, 160, 0, 0.7);
             letter-spacing: 12px;
-            white-space: nowrap; /* Prevents wrapping */
+            white-space: nowrap;
         }
 
         .title-english {
@@ -182,14 +190,11 @@
         }
 
         .title-sub {
-            margin-top: 15px; 
-            font-size: 0.8vw; 
-            color: rgba(255, 255, 255, 0.5);
-            letter-spacing: 4px; 
-            text-transform: uppercase;
+            margin-top: 15px; font-size: 0.8vw; color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 4px; text-transform: uppercase;
         }
 
-        /* --- BUTTON --- */
+        /* Start Button */
         #controls {
             position: absolute; bottom: 12%; left: 50%; transform: translateX(-50%);
             z-index: 10; transition: opacity 0.5s ease;
@@ -214,6 +219,7 @@
         }
         button:active { transform: scale(0.95); }
 
+        /* White Flash Effect */
         #flash {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: white; z-index: 100; pointer-events: none; opacity: 0;
@@ -252,29 +258,40 @@
     </div>
 
 <script>
+    /** * =========================================
+     * SECTION 1: CONFIGURATION & STATE
+     * =========================================
+     * Centralized settings for easy adjustments.
+     */
     const Config = {
-        totalParticipants: 1500,
-        drawDuration: 4500,
-        lanternCount: 90, 
-        baseSpeed: 1.5,
-        stormMaxSpeed: 30.0,
-        fireworksCount: 50,
-        confettiCount: 150
+        totalParticipants: 1500,    // Max number for lucky draw
+        drawDuration: 4500,         // Time in ms before winner is revealed
+        lanternCount: 90,           // Number of background lanterns
+        baseSpeed: 1.5,             // Idle speed of lanterns
+        stormMaxSpeed: 30.0,        // Speed during "Storm" mode
+        fireworksCount: 50,         // Particles per explosion
+        confettiCount: 150          // Particles for confetti
     };
 
     const State = {
-        mode: 'IDLE', 
+        mode: 'IDLE',               // Current game state (IDLE or STORM)
         width: 0,
         height: 0,
-        globalSpeedMultiplier: 1.0, 
+        globalSpeedMultiplier: 1.0, // For smooth acceleration/deceleration
         lastTime: 0
     };
 
-    // --- HIGH QUALITY ASSETS ---
+    /**
+     * =========================================
+     * SECTION 2: ASSET PRE-RENDERING
+     * =========================================
+     * Optimizes performance by drawing lanterns once to invisible canvases 
+     * and reusing them as images, instead of drawing paths every frame.
+     */
     const lanternCache = [];
     
     function preRenderLanterns() {
-        const cacheCount = 12; 
+        const cacheCount = 12; // Create 12 variations
         for (let i = 0; i < cacheCount; i++) {
             const size = 40 + Math.random() * 25; 
             const c = document.createElement('canvas');
@@ -283,17 +300,15 @@
             const ctx = c.getContext('2d');
             
             ctx.translate(size * 1.5, size * 1.5);
-
             const hue = Math.floor(Math.random() * 40); 
             
-            // 1. Core Glow (Brighter)
+            // 1. Draw Glow
             ctx.shadowBlur = 40;
             ctx.shadowColor = `hsla(${hue}, 100%, 60%, 0.8)`;
             
-            // 2. Body
+            // 2. Draw Lantern Body
             const w = size * 0.55; 
             const h = size * 0.75;
-            
             const grd = ctx.createLinearGradient(-w/2, -h/2, w/2, h/2);
             grd.addColorStop(0, `hsla(${hue}, 100%, 70%, 1)`);
             grd.addColorStop(1, `hsla(${hue}, 100%, 50%, 1)`);
@@ -305,14 +320,14 @@
             ctx.fillStyle = grd;
             ctx.fill();
 
-            // 3. Details
+            // 3. Draw Details (Gold Lines)
             ctx.shadowBlur = 0;
             ctx.strokeStyle = "rgba(255, 255, 220, 0.7)";
             ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(-w/2, -h/2); ctx.lineTo(-w/3, h/2); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(w/2, -h/2); ctx.lineTo(w/3, h/2); ctx.stroke();
 
-            // 4. Flame
+            // 4. Draw Flame
             ctx.shadowBlur = 20;
             ctx.shadowColor = "#fff";
             ctx.beginPath(); ctx.arc(0, h/4, w/5, 0, Math.PI * 2); 
@@ -322,16 +337,23 @@
         }
     }
 
+    /**
+     * =========================================
+     * SECTION 3: ANIMATION CLASSES
+     * =========================================
+     */
+
+    // Class for Background Lanterns
     class Lantern {
         constructor() {
             this.reset();
-            this.y = Math.random() * State.height; 
+            this.y = Math.random() * State.height; // Random start height
             this.swingPhase = Math.random() * Math.PI * 2;
         }
 
         reset() {
             this.x = Math.random() * State.width;
-            this.y = State.height + Math.random() * 200;
+            this.y = State.height + Math.random() * 200; // Start below screen
             this.baseSpeed = Math.random() * 0.5 + 0.5;
             this.sprite = lanternCache[Math.floor(Math.random() * lanternCache.length)];
             this.swingPhase = Math.random() * Math.PI * 2;
@@ -340,12 +362,15 @@
         }
 
         update(dt) {
+            // Apply global speed (accelerates during draw)
             const speed = this.baseSpeed * State.globalSpeedMultiplier * dt;
             this.y -= speed;
 
+            // Swinging physics
             this.swingPhase += this.swingSpeed * dt;
             this.x += Math.sin(this.swingPhase * 0.5) * 0.2 * dt;
 
+            // Loop when off-screen
             if (this.y < -150) this.reset();
         }
 
@@ -359,6 +384,7 @@
         }
     }
 
+    // Class for Fireworks and Confetti
     class Particle {
         constructor(x, y, isConfetti = false) {
             this.x = x; this.y = y;
@@ -367,17 +393,18 @@
             
             const angle = Math.random() * Math.PI * 2;
             if (isConfetti) {
+                // Confetti Physics
                 this.vx = (Math.random() - 0.5) * 5;
                 this.vy = (Math.random() - 0.5) * 5 - 5; 
                 this.drag = 0.95;
                 this.gravity = 0.15;
                 this.decay = 0.005;
                 this.size = Math.random() * 5 + 3;
-                // Brighter confetti
                 this.color = `hsl(${40 + Math.random()*20}, 100%, 75%)`; 
                 this.rotation = Math.random() * Math.PI;
                 this.rotationSpeed = (Math.random() - 0.5) * 0.2;
             } else {
+                // Firework Physics
                 const speed = Math.random() * 8 + 2;
                 this.vx = Math.cos(angle) * speed;
                 this.vy = Math.sin(angle) * speed;
@@ -385,7 +412,6 @@
                 this.gravity = 0.05;
                 this.decay = Math.random() * 0.02 + 0.01;
                 this.size = Math.random() * 3 + 1;
-                // Brighter fireworks
                 this.color = `hsl(${Math.random() * 50}, 100%, 75%)`; 
             }
         }
@@ -422,11 +448,17 @@
         }
     }
 
+    /**
+     * =========================================
+     * SECTION 4: MAIN RENDER LOOP
+     * =========================================
+     */
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d'); 
     const lanterns = [];
     let particles = []; 
 
+    // Setup and resize listeners
     function init() {
         resize();
         preRenderLanterns();
@@ -442,26 +474,30 @@
     }
     window.addEventListener('resize', resize);
 
+    // The Game Loop
     function loop(timestamp) {
         if (!State.lastTime) State.lastTime = timestamp;
+        // Calculate Delta Time to ensure smooth animation on all refresh rates
         const deltaTime = (timestamp - State.lastTime) / 16.67; 
         State.lastTime = timestamp;
-        
-        const dt = Math.min(deltaTime, 3.0);
+        const dt = Math.min(deltaTime, 3.0); // Cap dt to prevent jumps
 
+        // Smooth Acceleration Logic (Lerp towards target speed)
         const targetMultiplier = (State.mode === 'STORM') ? Config.stormMaxSpeed : 1.0;
         State.globalSpeedMultiplier += (targetMultiplier - State.globalSpeedMultiplier) * 0.05 * dt;
 
         ctx.clearRect(0, 0, State.width, State.height);
         
-        // Ensure additive blending for bright lights
+        // Use additive blending for glowing lights
         ctx.globalCompositeOperation = 'lighter';
 
+        // Update Lanterns
         for (let i = 0; i < lanterns.length; i++) {
             lanterns[i].update(dt);
             lanterns[i].draw(ctx);
         }
 
+        // Update Particles (loop backwards for splicing)
         for (let i = particles.length - 1; i >= 0; i--) {
             const p = particles[i];
             p.update(dt);
@@ -470,13 +506,19 @@
         }
         
         ctx.globalCompositeOperation = 'source-over';
-
         requestAnimationFrame(loop);
     }
 
+    /**
+     * =========================================
+     * SECTION 5: GAME LOGIC & DOM INTERACTION
+     * =========================================
+     */
     let scrambleInterval;
     const sfxStorm = document.getElementById('sfx-storm');
     const sfxBoom = document.getElementById('sfx-boom');
+    
+    // DOM Elements
     const els = {
         scrambleScreen: document.getElementById('scramble-screen'),
         winnerScreen: document.getElementById('winner-screen'),
@@ -487,6 +529,7 @@
         flash: document.getElementById('flash')
     };
 
+    // Triggered when "Ignite" is clicked
     function startDraw() {
         els.igniteBtn.style.opacity = '0'; 
         els.igniteBtn.style.pointerEvents = 'none';
@@ -498,6 +541,7 @@
         State.mode = 'STORM';
         els.scrambleScreen.classList.add('visible');
         
+        // Start number shuffling
         clearInterval(scrambleInterval);
         scrambleInterval = setInterval(() => {
             const r = Math.floor(Math.random() * Config.totalParticipants) + 1;
@@ -508,6 +552,7 @@
         setTimeout(revealWinner, Config.drawDuration);
     }
 
+    // Triggered when timer ends
     function revealWinner() {
         clearInterval(scrambleInterval);
         const winningNumber = Math.floor(Math.random() * Config.totalParticipants) + 1;
@@ -516,24 +561,28 @@
         
         try { sfxStorm.pause(); sfxBoom.currentTime = 0; sfxBoom.play(); } catch(e){}
 
+        // White Flash Effect
         els.flash.style.opacity = '0.8';
         setTimeout(() => { els.flash.style.opacity = '0'; }, 100);
 
         State.mode = 'IDLE';
         
+        // Show Winner Modal
         els.resultText.innerText = winningNumber;
         els.winnerScreen.classList.add('visible');
         
+        // Re-trigger CSS pop animation
         els.resultText.classList.remove('number-pop');
-        void els.resultText.offsetWidth; 
+        void els.resultText.offsetWidth; // Force Reflow
         els.resultText.classList.add('number-pop');
 
+        // Spawn Fireworks
         spawnExplosion(State.width/2, State.height/2, true);
-        
         setTimeout(() => spawnExplosion(State.width/2 - 300, State.height/2, false), 200);
         setTimeout(() => spawnExplosion(State.width/2 + 300, State.height/2, false), 400);
     }
 
+    // Reset game to initial state
     function resetDraw() {
         els.winnerScreen.classList.remove('visible');
         els.igniteBtn.style.opacity = '1';
@@ -541,9 +590,10 @@
         els.title.style.opacity = '1';
         els.title.style.transform = 'translate(-50%, -50%) scale(1)';
         State.mode = 'IDLE';
-        particles = []; 
+        particles = []; // Clear particles
     }
 
+    // Helper to spawn explosion particles
     function spawnExplosion(x, y, includeConfetti) {
         for (let i = 0; i < Config.fireworksCount; i++) {
             particles.push(new Particle(x, y, false));
@@ -555,6 +605,7 @@
         }
     }
 
+    // Start everything
     init();
 
 </script>
